@@ -5,4 +5,4 @@ class ImageresizerConfig(AppConfig):
     name = 'ImageResizer'
 
     def ready(self):
-        import ImageResizer.receivers
+        from . import receivers

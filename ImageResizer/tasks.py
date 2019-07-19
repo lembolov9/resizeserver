@@ -1,19 +1,14 @@
-from io import BytesIO
+import logging
 
-from PIL import Image
-from django.core.files.base import ContentFile
-
-from ImageResizer.models import ResizeTask
 from resizeserver.celery import app
+from ImageResizer.models import ResizeTask
 
 
-@app.task(track_started = True)
+logger = logging.getLogger(__name__)
+
+@app.task()
 def resize_image(pk):
-    instance = ResizeTask.objects.get(pk=pk)
-    filename = instance.original_img.name.split('/')[-1]
+    instance = ResizeTask.objects.get(id=pk)
+    instance.resize()
+    logger.info(f'Task with id = {instance.pk} is completed')
 
-    img_io = BytesIO()
-    img = Image.open(instance.original_img).resize((instance.width, instance.height), Image.ANTIALIAS)
-    img.save(img_io, format=filename.split('.')[-1], quality=100)
-
-    instance.resized_img.save(filename, content=ContentFile(img_io.getvalue()))

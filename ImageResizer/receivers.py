@@ -5,9 +5,8 @@ from ImageResizer.models import ResizeTask
 from ImageResizer.tasks import resize_image
 
 
-@receiver(post_save, sender=ResizeTask)
-def create_resize_task(sender, instance, created, **kwargs):
+@receiver(post_save, sender = ResizeTask)
+def start_resize_signal_receiver(sender, instance, created, *args, **kwargs):
     if created:
-        task_id = resize_image.apply_async(args = [instance.pk]).id
-        instance.resize_id = task_id
+        instance.resize_id = resize_image.apply_async(args=[instance.pk])
         instance.save()
